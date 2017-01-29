@@ -9,3 +9,5 @@ class Trade(object):
         self.quantity = int(quantity)
         self.price = float(price)
 
+    def get_price(self):
+        return self.price

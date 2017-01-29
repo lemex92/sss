@@ -1,5 +1,5 @@
 import unittest
-from super_simple_stocks.models.stock import Stock
+from sss.models.stock import Stock
 
 
 class TestStock(unittest.TestCase):
@@ -49,7 +49,8 @@ class TestStock(unittest.TestCase):
         stock = Stock(symbol="tea", stock_type="PREFERRED", last_dividend=5, fixed_dividend=10,
                       par_value=300, ticker_price=100)
 
-        expected_str = "Symbol=tea;Stock Type=PREFERRED;Price=100.0p;Last Dividend=5.0;Fixed Dividend=10.0%;Dividend Yeild=3000.0;PE Ratio=0.0333333333333"
+        expected_str = "Symbol=tea;Stock Type=PREFERRED;Price=100.0p;Last Dividend=5.0;Fixed Dividend=10.0%;" \
+                       "Dividend Yeild=0.3;PE Ratio=333.333333333"
         self.assertEquals(str(stock), expected_str)
 
     def test_create_stock_str_common(self):
@@ -60,14 +61,25 @@ class TestStock(unittest.TestCase):
         self.assertEquals(str(stock), expected_str)
 
     def test_stock_dividend_yeild_common(self):
-        print "test"
+        stock = Stock(symbol="tea", stock_type="COMMON", last_dividend=5, fixed_dividend=20,
+                      par_value=250, ticker_price=100)
+
+        self.assertEquals(stock.dividend_yeild(), 0.05)
 
     def test_stock_dividend_yeild_perferred(self):
-        print "test"
+        stock = Stock(symbol="tea", stock_type="PREFERRED", last_dividend=5, fixed_dividend=20,
+                      par_value=250, ticker_price=100)
 
-    def test_stock_dividend_pe_ratio(self):
-        print "test"
+        self.assertEquals(stock.dividend_yeild(), 0.5)
 
+    def test_stock_dividend_pe_ratio_common(self):
+        stock = Stock(symbol="tea", stock_type="COMMON", last_dividend=5, fixed_dividend=None,
+                      par_value=250, ticker_price=100)
 
-if __name__ == "main":
-    unittest.main()
+        self.assertEquals(stock.pe_ratio(), 2000)
+
+    def test_stock_dividend_pe_ratio_prefferred(self):
+        stock = Stock(symbol="tea", stock_type="PREFERRED", last_dividend=5, fixed_dividend=20,
+                      par_value=250, ticker_price=100)
+
+        self.assertEquals(stock.pe_ratio(), 200.0)

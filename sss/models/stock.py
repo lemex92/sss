@@ -3,7 +3,7 @@ from random import uniform
 
 class Stock(object):
     def __init__(self, symbol, stock_type, last_dividend=None, fixed_dividend=None, par_value=None,
-                 ticker_price=uniform(1, 200)):
+                 ticker_price=None):
         self.symbol = symbol
         self.ticker_price = float(ticker_price)
 
@@ -18,10 +18,7 @@ class Stock(object):
         if stock_type == "PREFERRED" and (not fixed_dividend or not last_dividend):
             raise Exception("Fixed and last dividend must be provided when stock type is preferred")
 
-        if last_dividend:
-            self.last_dividend = float(last_dividend)
-        else:
-            self.last_dividend = None
+        self.last_dividend = float(last_dividend)
 
         if fixed_dividend:
             self.fixed_dividend = float(fixed_dividend)
@@ -37,18 +34,15 @@ class Stock(object):
                                                        self.last_dividend, self.fixed_dividend, self.dividend_yeild(),
                                                        self.pe_ratio())
         return "Symbol={};Stock Type={};Price={}p;Last Dividend={};" \
-               "Dividend Yeild={};PE Ratio={}".format(self.symbol, self.stock_type, self.ticker_price, self.last_dividend,
-                                                      self.dividend_yeild(), self.pe_ratio())
+               "Dividend Yeild={};PE Ratio={}".format(self.symbol, self.stock_type, self.ticker_price,
+                                                      self.last_dividend, self.dividend_yeild(), self.pe_ratio())
 
     def dividend_yeild(self):
-        if self.last_dividend == 0:
-            return -1
-
         if self.stock_type == "COMMON":
             return self.last_dividend/self.ticker_price
 
         if self.stock_type == "PREFERRED":
-            return ((self.fixed_dividend/100) * self.par_value) * self.ticker_price
+            return ((self.fixed_dividend/100) * self.par_value) / self.ticker_price
 
     def pe_ratio(self):
         if self.ticker_price > 0:

@@ -1,7 +1,8 @@
-from super_simple_stocks.models.stock import Stock
-from super_simple_stocks.models.trade import Trade
-from super_simple_stocks.utils.time_utils import get_date_time_since, time_now
-from operator import add
+from operator import add, mul
+from math import sqrt
+from sss.models.trade import Trade
+from sss.models.stock import Stock
+from sss.utils.time_utils import get_date_time_since, time_now
 
 
 class StockManager(object):
@@ -20,11 +21,11 @@ class StockManager(object):
     def get_trades(self):
         return self.trades
 
-    def create_trade(self, stock_symbol, indicator, quanitity, price, time_stamp=time_now()):
+    def create_trade(self, stock_symbol, indicator, quantity, price, time_stamp=time_now()):
         if stock_symbol not in self.get_stock_symbols():
             raise Exception("Invalid stock symbol")
 
-        trade = Trade(stock_symbol, indicator, quanitity, price, time_stamp)
+        trade = Trade(stock_symbol, indicator, quantity, price, time_stamp)
         self.trades.append(trade)
 
     def calculate_stock_price(self, symbol, since_minutes=15):
@@ -43,3 +44,22 @@ class StockManager(object):
             return 0
 
         return prices_per_quan / quan
+
+    # I seen this very nice function, a few months back on Redit
+    # https://gist.github.com/Glench/4626483 why reinvent the wheel?
+    def calculate_geometric_mean_for_trades_online(self):
+        trade_prices = [trade.get_price() for trade in self.get_trades()]
+        return self._online_geometric_mean(trade_prices)
+
+    def _online_geometric_mean(self, iterable):
+        return (reduce(mul, iterable)) ** (1.0 / len(iterable))
+
+    # My first attempt
+    def calculate_geometric_mean_for_trades(self):
+        trade_prices = [trade.get_price() for trade in self.trades]
+        return self.geometric_mean(trade_prices)
+
+    def geometric_mean(self, iterable):
+        total_price = (reduce(mul, iterable))
+        len_iterable = len(iterable)
+        return pow(total_price, (1.0/len_iterable))

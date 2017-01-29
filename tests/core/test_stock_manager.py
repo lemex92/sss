@@ -1,8 +1,7 @@
 import unittest
-from mock import patch
-from super_simple_stocks.core.stock_manager import StockManager
-from super_simple_stocks.models.stock import Stock
-from super_simple_stocks.utils.time_utils import time_now, get_date_time_since
+
+from sss.core.stock_manager import StockManager
+from sss.utils.time_utils import time_now, get_date_time_since
 
 
 class TestStockManager(unittest.TestCase):
@@ -69,5 +68,14 @@ class TestStockManager(unittest.TestCase):
         with self.assertRaises(Exception) as e:
             stock_manager.calculate_stock_price("tea")
         self.assertEqual('No trades found for tea', str(e.exception))
-if __name__ == "main":
-    unittest.main()
+
+    def test_my_geometric_mean_vs_online_impl(self):
+        stock_manager = StockManager()
+        stock_manager.add_stock("tea", "COMMON", 5, fixed_dividend=None, par_value=200, ticker_price=60)
+        stock_manager.create_trade("tea", "BUY", 10, 30, get_date_time_since(20))
+        stock_manager.create_trade("tea", "BUY", 100, 5, get_date_time_since(20))
+        stock_manager.create_trade("tea", "BUY", 45, 2, get_date_time_since(20))
+        stock_manager.create_trade("tea", "BUY", 7, 52, get_date_time_since(20))
+
+        self.assertEquals(stock_manager.calculate_geometric_mean_for_trades(),
+                          stock_manager.calculate_geometric_mean_for_trades_online())
